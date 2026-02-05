@@ -1,0 +1,19 @@
+\pgfplotstabletypeset[
+    col sep=comma,
+    header=true,
+    columns={balance_factor,p_s,compute,bias,compute_delta,bias_delta,p_s_error},
+    columns/balance_factor/.style={column name={Balance Factor}},
+    columns/p_s/.style={column name={$p_s$}},
+    columns/compute/.style={column name={Compute}},
+    columns/bias/.style={column name={Bias}},
+    columns/compute_delta/.style={column name={$\Delta$ Compute}},
+    columns/bias_delta/.style={column name={$\Delta$ Bias}},
+    columns/p_s_error/.style={column name={$p_s$ Error}, sci, sci zerofill},
+    every head row/.style={before row=\toprule, after row=\midrule},
+    every last row/.style={after row=\bottomrule},
+    row predicate/.code={
+        \ifnum#1>9
+            \pgfplotstableuserowfalse
+        \fi
+    }
+]{results/bias_experiment4_balance_points.csv}

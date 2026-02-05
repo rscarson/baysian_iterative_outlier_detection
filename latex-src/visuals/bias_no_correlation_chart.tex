@@ -1,0 +1,49 @@
+
+\begin{tikzpicture}
+  \begin{axis}[
+        xlabel={$p\_\text{fail}$},
+        ylabel={Bias},
+        legend style={at={(1,0.5)}, anchor=east}, % east side, vertically centered
+        grid=both,
+        minor tick num=4,
+        minor grid style={gray!10, thin},
+        width=15cm,
+        height=8cm,
+        filter discard warning=false,
+        scaled y ticks = false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+        scaled x ticks = false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+  ]
+
+    \pgfplotstableread[col sep=comma]{results/bias_experiment1.csv}\datatable
+    
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+    ] table[
+        x=p_fail,
+        y=meanmean,
+        y error plus=meanstdev,
+        y error minus=meanstdev,
+    ]{\datatable};
+    \addlegendentry{Mean of Bias across $r_\text{pass}$}
+    
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+    ] table[
+        x=p_fail,
+        y=stdevmean,
+        y error plus=stdevstdev,
+        y error minus=stdevstdev,
+    ]{\datatable};
+    \addlegendentry{\sigma Bias across $r_\text{pass}$}
+  \end{axis}
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+\section{Introduction}
+
+\subsection{Problem Statement}
+When testing a polynomial function, or mechanism that retrieves one, it can be helpful to use random transforms on a data set to catch edge cases. However this introduces the probability that any given run of the test will fail to catch such an edge case.
+
+The most common standard approach is to run the test a fixed number of times $k$, determined heuristically by the perceived risk of failure, and the cost of running the test. 
+
+However this approach has several drawbacks:
+\begin{itemize}
+    \item Per-trial risk of failure is the quantity under measurement, thus rendering it difficult to determine a good $k$
+    \item It does not provide a quantifiable confidence that the test has caught edge cases, or that the test has passed with a given level of confidence.
+    \item It must use a conservative estimate for $k$, but cannot adapt to the observed failure rate during testing.
+    \item $k$ must be adjusted to compensate for changes in set-size, the effects of which can be difficult to estimate
+\end{itemize}
+
+It can be assumed a driving factor determining the rate of failure in such a setup is the presence of extreme outliers in the data set, and the interactions between these outliers. And in the case of artificial data sets, these outliers may be intentionally introduced to test the robustness of the mechanism under test, and thus have a known distribution and frequency.
+
+Failure rate can in many cases be shown to scale with the size of the data set, but with diminishing returns as the data set grows larger.
+
+While sequential analysis has a rich history in statistics \cite{Wald1945}, and Bayesian methods are well established, their application to software testing, particularly for numerical implementations under known injected noise, remains underexplored.

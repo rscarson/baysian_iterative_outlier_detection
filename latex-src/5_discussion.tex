@@ -1,0 +1,17 @@
+\section{Discussion}
+
+The results presented in Section 4 highlight several key strengths of the BIOD algorithm, as well as areas for further exploration.
+
+One notable finding is BIOD's robustness to mis-specification of the pointwise failure probabilities. Contrary to our initial hypothesis, the performance of BIOD remained consistent regardless of whether the pointwise $p$ values were well-specified or deliberately misestimated. This resilience suggests that BIOD can be effectively applied in scenarios where precise prior knowledge of failure probabilities is unavailable, enhancing its practical utility in a wider range of applications than initially anticipated.
+
+Two possible explanations for this robustness are the conservative nature of the initial failure probability estimates due to the damping fraction model, as well as the effect of the relatively strong prior strength used in the Bayesian updating process (Section \ref{sec:ps_experiment4}). Both factors likely contribute to stabilizing the estimates against inaccuracies in the initial parameters.
+
+Another finding was the lack of inherent bias in BIOD's failure probability estimates across various scenarios (See Section \ref{sec:ps_experiment1}). Across the universe of input parameters tested, BIOD consistently produced a mean bias near zero, with very little variation. This characteristic is particularly advantageous in applications where unbiased estimates are critical, as it ensures that the algorithm does not systematically overestimate or underestimate failure probabilities regardless of specified parameters.
+
+The introduction of the damping fraction to temper the number of iterations as set size increases also proved effective in controlling computational cost while maintaining reliable estimates. The model represents a saturating monotonic relationship with $C$ modulating the effective binding strength between outliers in the dataset. This allows users to tune the algorithm based on available computational resources without significantly compromising accuracy. It is noteworthy that $p_s$ and $C$ should be considered a pair - modifying $C$ will likely change the optimal $p_s$ value.
+
+During the update procedure, instead of a pure Bayesian update after each iteration, we employed a bulk update approach, aggregating evidence from multiple iterations before updating the posterior distribution on failure. This has the advantage of eliminating the possibility of artificially lengthy tests in the case of an absense of failure without compromising the Bayesian nature of the update. 
+
+Finally, the use of a frequentist stopping criterion based on confidence intervals proved effective in ensuring that BIOD halts iterations once sufficient evidence has been gathered. The lower-bound confidence intervals consistently encompassed the true failure probabilities, demonstrating the reliability of this stopping condition. This approach balances the need for computational efficiency with the requirement for accurate estimates, making it a practical choice for real-world applications.
+
+Future work could explore the extend of the independence assumption made in the BIOD model, particularly in datasets where outliers may exhibit correlations. Additionally, investigating alternative prior distributions or adaptive prior strength mechanisms could further enhance the algorithm's performance across diverse scenarios.

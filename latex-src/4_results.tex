@@ -1,0 +1,15 @@
+\section{Results}
+
+We evaluated the BIOD algorithm across a range of scenarios to assess its performance in terms of confidence accuracy, computational efficiency, and robustness to parameter mis-specification.
+
+In the experiments described in Sections \ref{sec:p_fail_experiment1} and \ref{sec:p_fail_experiment2}, we explored the effectiveness of BIOD's initial failure probability estimation compared to simulated ground truth values. Figures \ref{fig:p_fail_experiment1} and \ref{fig:p_fail_experiment2} illustrate that BIOD's estimates closely align with the actual failure probabilities, while remaining conservative, thus validating the algorithm's reliability in practical applications.
+
+In the subsequent experiment in Section \ref{sec:p_fail_experiment3}, we tested the validity of the confidence interval BIOD uses to determine when to stop iterating. As shown in Figure \ref{fig:p_fail_experiment3}, the lower-bound confidence intervals produced by BIOD consistently encompass the true failure probabilities across various dataset sizes and pointwise failure probabilities, demonstrating the robustness of the stopping criterion.
+
+In addition, contrary to our hypothesis, the badly specified pointwise $p$ values (blue and red curves) performed comparably to the well-specified values (green curves), indicating that BIOD is resilient to inaccuracies in initial parameter settings.
+
+Next, in Section \ref{sec:damping_experiment1}, we explored the effect of the damping constant on BIOD's stopping condition via the floor on the number of iterations as set size increases. Figure \ref{fig:graph_table} shows that the damping constant has a linear monotonic effect on the number of iterations performed, allowing for tuning based on available computational resources.
+
+Finally, in Sections \ref{sec:ps_experiment1} through \ref{sec:ps_experiment4}, we investigated the impact of prior strength on BIOD's performance. Figure \ref{fig:ps_experiment4} shows that increasing prior strength leads to an improvement in bias of the failure probability estimates, albeit with diminishing returns, at the cost of increased computational effort following the hill curve for both metrics.
+
+These results collectively demonstrate that BIOD is an effective and adaptable algorithm for iterative outlier detection, capable of providing reliable estimates while allowing for customization based on specific application needs.

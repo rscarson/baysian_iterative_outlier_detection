@@ -1,0 +1,506 @@
+\section{Methodology}
+
+\subsection{Experiment 1: Conservative Estimate of p\_fail vs Simulated True p\_fail}
+\label{sec:p_fail_experiment1}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{p_fail_model}
+        \caption{Graph showing the conservative estimates of $p_\text{fail}$ vs simulated true $p_\text{fail}$ for various dataset sizes $n$}
+        \label{fig:p_fail_experiment1}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To verify that calculated $p_\text{fail}$ is a conservative underestimate of the true simulated $p_\text{fail}$ across a range of dataset sizes $n$.
+
+    \subsubsection{Setup.}
+
+        \begin{itemize}
+            \item Vary set size $n$ logarithmically from $1e0$ to $1e5$.
+            \item For each $n$, run $10{,}000$ trials.
+            \item For each trial, simulate failure due to extreme outliers, accounting for interactions between outliers:
+            \begin{itemize}
+                \item Draw $n$ samples from a standard normal distribution ($\mu=0$, $\sigma=1$).  
+                \item Define extreme outliers as samples with absolute value greater than $3$.  
+                \item A trial fails if the sum of all extreme outliers exceeds $3$ in absolute value.  
+            \end{itemize}
+            \item Record the observed failure rate across trials as the simulated true $p_\text{fail}$.  
+            \item For each $n$, calculate the corresponding conservative initial estimate of $p_\text{fail}$ using the BIOD method:
+            \begin{itemize}
+                \item Confidence level: $0.99$  
+                \item Outlier probability: $0.0027$ (approximate probability of $|x| > 3\sigma$ in a normal distribution)  
+                \item Pass ratio: $0.0$ (not used in this experiment)
+            \end{itemize}
+        \end{itemize}
+
+    \subsubsection{Definition of Metrics.}
+
+        \begin{itemize}
+            \item $p_\text{fail, true}$: Observed failure rate from simulations.  
+            \item $p_\text{fail, calc}$: Calculated conservative estimate of $p_\text{fail}$ using BIOD.
+        \end{itemize}
+
+    \subsubsection{Hypothesis.}
+
+        BIOD is expected to yield a calculated $p_\text{fail, calc}$ that is less than or equal to the observed $p_\text{fail, true}$ across all tested set sizes $n$.
+
+    \subsubsection{Results.}
+
+        As shown in Figure~\ref{fig:p_fail_experiment1}, $p_{\text{fail, calc}}$ consistently underestimates $p_{\text{fail, true}}$ across the full range of dataset sizes $n$. 
+        Moreover, the two curves exhibit similar functional form, indicating that the estimator preserves the underlying dependence on $n$ while remaining systematically conservative.
+
+    \subsubsection{Analysis / Interpretation.}
+
+        The results confirm the hypothesis that the BIOD-calculated $p_\text{fail}$ is a conservative underestimate of the true simulated $p_\text{fail}$ across all 
+        dataset sizes tested.
+
+        By following the same trend as the true $p_\text{fail}$, the BIOD estimate avoids the trap of underestimating by enough to make initial $k$ too large to be useful,
+        as $n$ increases, while still providing a reliable conservative estimate.
+
+    \subsubsection{Summary / Recommendation.}
+
+        The BIOD method provides a reliable conservative estimate of $p_\text{fail}$, without trend inversion as $n$ varies, making it suitable for this application.
+
+\subsection{Experiment 2: Predicted k to Observed k to Failure}
+\label{sec:p_fail_experiment2}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{p_fail_k_to_fail}
+        \caption{Graph showing the predicted number of iterations $k$ to observed failure vs the simulated results}
+        \label{fig:p_fail_experiment2}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To verify that the predicted number of iterations $k$ to failure from BIOD encompasses the observed number of iterations $k$ to 
+    failure across a range of dataset sizes $n$.
+
+    \subsubsection{Setup.}
+
+        \begin{itemize}
+            \item Vary set size $n$ logarithmically from $1e0$ to $1e5$.
+            \item For each $n$, run $10{,}000$ trials.
+            \begin{itemize}
+                \item Draw $n$ samples from a standard normal distribution ($\mu=0$, $\sigma=1$).  
+                \item Define extreme outliers as samples with absolute value greater than $3$.  
+                \item A trial fails if the sum of all extreme outliers exceeds $3$ in absolute value.  
+            \end{itemize}
+            \item For each trial, record the number of iterations $k$ taken to find a failing set  
+            \item Take the mean and standard deviation of observed $k$ across trials.
+            \item After all trials for a given $n$, calculate the predicted $k$ to failure using the BIOD method:
+            \begin{itemize}
+                \item Confidence level: $0.99$  
+                \item Outlier probability: $0.0027$ (approximate probability of $|x| > 3\sigma$ in a normal distribution)  
+                \item Pass ratio: $0.0$ (not used in this experiment)
+            \end{itemize}
+        \end{itemize}
+
+    \subsubsection{Definition of Metrics.}
+
+        \begin{itemize}
+            \item $k_\text{obs, mean}$: Mean observed iterations to failure from simulations.  
+            \item $k_\text{obs, stdev}$: Standard deviation of observed iterations to failure from simulations.  
+            \item $k_\text{predicted}$: Predicted iterations to failure using BIOD.
+        \end{itemize}
+
+    \subsubsection{Hypothesis.}
+
+        The BIOD is expected to yield a predicted $k_\text{predicted}$ that is greater than or equal to the mean observed $k_\text{obs, mean}$ across all tested set sizes $n$.
+
+    \subsubsection{Results.}
+
+        As shown in Figure~\ref{fig:p_fail_experiment2}, $k_{\text{predicted}}$ consistently overestimates $k_{\text{obs, mean}}$ across the full range of dataset sizes $n$.
+        The predicted values remain above the observed means, following the same trend as observed $k$ to failure, similarly to Experiment 1.
+
+        The observed standard deviation $k_{\text{obs, stdev}}$ shrinks as $n$ increases, indicating more consistent behavior in larger datasets.
+
+    \subsubsection{Analysis / Interpretation.}
+
+        The results confirm the hypothesis that the BIOD-predicted $k$ to failure is a conservative overestimate of the mean observed $k$ to failure across all
+        dataset sizes tested.
+
+        This means that for a well specified test, BIOD's predicted $k$ will likely include a failure within that number of iterations, providing confidence in
+        the method's reliability.
+
+    \subsubsection{Summary / Recommendation.}
+
+        The BIOD method provides a reliable conservative prediction of iterations to failure, making it suitable for this application.
+
+\subsection{Experiment 3: Confidence Interval on p\_fail Estimates}
+\label{sec:p_fail_experiment3}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{p_fail_confidence}
+        \caption{Graph showing the mean and standard deviation of lower-bound confidence intervals on the sample of iterations observed by BIOD from a simulation of 10,000 trials, compared to the simulated true $p_\text{fail}$ for various dataset sizes $n$, and for various values of pointwise $p$. Green was deliberately underestimated, blue was exact, and red was deliberately overestimated. Markers indicate the number of iterations $k$ performed by BIOD at each point.}
+        \label{fig:p_fail_experiment3}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To verify that the calculated $p_\text{fail}$ from BIOD provides accurate confidence intervals that encompass the observed $p_\text{fail}$ across a range of dataset sizes $n$ and pointwise $p$ values.
+
+    \subsubsection{Setup.}
+
+        \begin{itemize}
+            \item Vary set size $n$ logarithmically from $1e0$ to $1e5$.
+            \item Test $10{,}000$ sets for each combination of $n$, to calculate observed $p_\text{fail}$.
+            \item Run BIOD with the same results to calculate confidence intervals on $p_\text{fail}$ for each value of pointwise $p$:
+            \begin{itemize}
+                \item Underestimate of $p$: $p_\text{outlier} = 1e-4$  
+                \item Exact $p$: $p_\text{outlier} = 0.0027$ (approximate probability of $|x| > 3\sigma$ in a normal distribution)  
+                \item Overestimate of $p$: $p_\text{outlier} = 0.01$
+            \end{itemize}
+        \end{itemize}
+
+
+    \subsubsection{Definition of Metrics.}
+
+    \begin{itemize}
+        \item $p_\text{fail}$: True failure rate from simulations.  
+        \item $p_\text{fail, biod, min}$: Lower bound of BIOD-calculated confidence interval for $p_\text{fail}$.  
+        \item $p_\text{fail, biod, max}$: Upper bound of BIOD-calculated confidence interval for $p_\text{fail}$.
+        \item $p_\text{fail, obs}$: Observed failure rate in the sample BIOD selects.  
+    \end{itemize}
+
+    \subsubsection{Hypothesis.}
+
+        The BIOD-calculated confidence intervals for $p_\text{fail}$ are expected to encompass the observed $p_\text{fail}$ for accurate and underestimated pointwise $p$ values, and to potentially miss for overestimated pointwise $p$ values, across all tested set sizes $n$.
+
+    \subsubsection{Results.}
+
+        As shown in Figure~\ref{fig:p_fail_experiment3}, the calculated confidence intervals for $p_\text{fail}$ from BIOD successfully encompass the observed $p_\text{fail}$ for both all tested set sizes $n$ even for badly specified pointwise $p$ values.
+
+        When pointwise $p$ is underestimated (green), the confidence intervals are narrower and more accurate, closely tracking the observed $p_\text{fail}$.
+
+        When pointwise $p$ is exact (blue), the confidence intervals remain accurate, but is much wider than the underestimated case.
+
+        When pointwise $p$ is overestimated (red), the confidence intervals are significantly wider for small $n$ and converge to the exact case as $n$ increases, but still encompass the observed $p_\text{fail}$.
+
+    \subsubsection{Analysis / Interpretation.}
+
+    These results show that BIOD is robust to badly specified pointwise $p$ parameters, but gains significant accuracy when pointwise $p$ is well specified or conservative (i.e., underestimated).
+
+    An overly conservative (underestimated) pointwise $p$ leads to tighter confidence intervals, due to the larger number of iterations BIOD performs in this case, improving the accuracy of the $p_\text{fail}$ estimate.
+
+    An overly aggressive (overestimated) pointwise $p$ leads to wider confidence intervals, especially for small $n$, due to the smaller number of iterations BIOD performs in this case, reducing the accuracy of the $p_\text{fail}$ estimate. However, as $n$ increases, the effect of pointwise $p$ mis-specification diminishes, and the confidence intervals converge towards those obtained with exact pointwise $p$.
+
+    \subsubsection{Summary / Recommendation.}
+
+    The BIOD method provides reliable confidence intervals for $p_\text{fail}$ estimates, particularly when pointwise $p$ is well specified or underestimated, but is still useful when pointwise $p$ is overestimated.
+
+\subsection{Experiment 4: Damping Constant Effect on k floor}
+\label{sec:damping_experiment1}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{damping_constant_chart}
+        \caption{Left: Graph of $k_{\text{floor}}$ vs $C$ values in the defined parameter space. Right: Table showing values of $k_{\text{floor}}$ for $C_{\text{mean}} \pm C_{\sigma}$ for various confidence levels $q$.}
+        \label{fig:graph_table}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To investigate the relationship between the damping constant $C$, desired $k$ floor and confidence level $q$.
+
+    \subsubsection{Setup.}
+    The experiment will be performed in 2 parts:
+
+    \paragraph{Part 1}
+    Vary $q$ smoothly from $0.8$ to $0.99$ in increments of $0.01$. For each $q$, vary $k$ from $3$ to $10$ in increments of $1$. 
+    Compute the corresponding $C$ value for each $(k, q)$ pair using the formula provided below:
+    \[ C = \frac{k}{-\ln(1 - q)} \]
+
+    This will provide a range of $C$ values corresponding to the desired $k$ floor and $q$ values defined in the parameter space.
+    
+    \paragraph{Part 2}
+    Use the results from Part 1 to compute the mean $C_{\text{mean}}$ and standard deviation $C_{\sigma}$ of the damping constant $C$ across all $(k, q)$ pairs.
+    For the range $C = C_{\text{mean}} \pm C_{\sigma}$, compute the corresponding $k_{\text{floor}}$ values for specific confidence levels $q = [0.8, 0.9, 0.95, 0.99]$:
+    \[ k_{\text{floor}} = {C \cdot -\ln(1 - q)} \]
+
+    This will provide a table of $k_{\text{floor}}$ values for the defined range of $C$ and specific confidence levels.
+
+    \subsubsection{Definition of Metrics.}
+
+        Damping constant $C$ for each desired $k$ floor and pass probability $q$.
+
+    \subsubsection{Hypothesis.}
+
+    We expect $C$ to increase monotonically with $k$ and $q$.
+
+    \subsubsection{Results.}
+
+    The results, shown in Figure~\ref{fig:graph_table}, confirm that $C$ increases with both desired $k$ floor and pass probability $q$, ranging from $< 1$ to $> 6$ in our defined parameter space.
+
+    Narrowing the range to $C = C_{\text{mean}} \pm C_{\sigma}$ gives us a range of $1.56$ to $4.13$, where $k_{\text{floor}}$ values between $3$ and $10$ correspond to $C$ values between $1.82$ and $2.07$ for confidence levels between $0.8$ and $0.99$.
+
+    \subsubsection{Analysis / Interpretation.}
+
+    The results confirm the hypothesis that $C$ increases with both desired $k$ floor and pass probability, and gives us a practical basis to verify the value found analytically in Section~\ref{sec:derivation_c}.
+
+    \subsubsection{Summary / Recommendation.}
+
+    From the table, a value between $C = 1.82$ and $C = 2.07$ best represents the desired $k$ floor range of 3-10 for confidence levels between $0.8$ and $0.99$.
+
+\subsection{Experiment 5: Bias vs p\_fail and ratio\_pass}
+\label{sec:ps_experiment1}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{bias_no_correlation_chart}
+        \caption{Graph demonstrating the lack of correlation between $p\_\text{fail}$, $\text{ratio}\_\text{pass}$, and bias in the base case of $p_s = 1$}
+        \label{fig:ps_experiment1}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To investigate the relationship between bias, $p_\text{fail}$, and pass ratio.
+    $p_\text{fail}$ is calculated using $p$, $q$ and $n$, and so betwen it and $ratio\_pass$ we can explore the bias behavior of BIOD across the parameter space in the base-case of $p_s = 1$.
+
+    \subsubsection{Setup.}
+
+    \begin{itemize}
+        \item We select $ratio_pass \in \{0.2, 0.5, 0.8, 0.9, 0.95, 0.99, 0.999\}$.
+        \item We vary $p_\text{fail}$ from $0.05$ to $0.50$ in increments of $0.01$
+        \item For each $p_\text{fail}$, we compute the corresponding dataset size $n$ using:
+        \[
+            n = \left\lceil \frac{-\ln(1 - p_\text{fail})}{p'} \right\rceil,
+            \quad p' = \frac{1}{1 + C \cdot n \cdot p},
+            \quad C = 1.864, \quad p = 10^{-6}
+        \]
+    \end{itemize}
+
+    For each $(p_\text{fail}, ratio\_pass)$ pair, perform the 10,000 iterations of the following:
+
+    \begin{itemize}
+        \item Draw a value $x$ from a uniform distribution $U(0, 1)$.
+        \item Determine range for the rate of failure based on the following piecewise function:
+        \[
+            failure_rate =
+            \begin{cases}
+                [0.001, 0.01] & x < 0.1 \\
+                [0.01, 0.05] & 0.1 \le x < 0.3 \\
+                [0.05, 0.20] & 0.3 \le x < 0.65 \\
+                [0.20, 0.50] & 0.65 \le x < 0.9 \\
+                [0.50, 0.999] & x \ge 0.9
+            \end{cases}
+        \]
+        \item Draw a true failure probability $p_\text{fail, true}$ from a uniform distribution over the determined range.
+        \item Run BIOD using the failure rate found, noting the $pass\_ratio$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
+        \item Compute bias as $p_\text{fail, true} - pass\_ratio$.
+        \item Compute the mean and standard deviation of bias across all iterations for each $ratio\_pass$ value.
+    \end{itemize}
+            
+    For each $p_\text{fail}$, compute:
+    \begin{itemize}
+        \item The mean of all bias means across all $ratio\_pass$ values.
+        \item The standard deviation of all bias means across all $ratio\_pass$ values.
+        \item The mean of all bias standard deviations across all $ratio\_pass$ values.
+        \item The standard deviation of all bias standard deviations across all $ratio\_pass$ values.
+    \end{itemize}
+
+    \subsubsection{Definition of Metrics.}
+
+        \begin{itemize}
+            \item $p_\text{fail}$: Calculated failure probability from BIOD.
+            \item $ratio\_pass$: Pass ratio parameter provided to BIOD.
+            \item $bias$: Difference between true failure probability and observed pass ratio. The mean of bias represents systematic error, while the standard deviation represents variability in the error.
+        \end{itemize}
+
+    \subsubsection{Hypothesis.}
+
+    We expect bias to increase proportionally with the difference between $p_\text{fail}$ and $ratio\_pass$.
+
+    \subsubsection{Results.}
+
+    Contrary to our hypothesis, we find that bias remains relatively constant across the parameter space, with mean bias values clustering around $0.0$ and standard deviation of bias remaining low for all combinations of $p_\text{fail}$ and $ratio\_pass$.
+
+    We also found that the standard deviation of bias mean and standard deviation of bias standard deviation across all $ratio\_pass$ values remained low for all $p_\text{fail}$ values.
+
+    \subsubsection{Analysis / Interpretation.}
+
+    Since the parameters tested involve all of BIOD's inputs except for prior strength, this experiment establishes that BIOD's bias behavior is not predictable from inputs, and will be a factor of prior strength alone.
+
+    \subsubsection{Summary / Recommendation.}
+
+    These results indicate that prior strength is the key parameter influencing bias in BIOD, and should be the focus of further investigation.
+
+    It suggests that $p_s$ is not a function of inputs, but a constant that can be pre-computed to achieve desired bias characteristics.
+    
+\subsection{Experiment 6: Prior Strength vs Bias and Compute}
+\label{sec:ps_experiment2_3}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{bias_ps_tradeoff_charts}
+        \label{fig:ps_experiment3}
+        \end{minipage}
+        \caption{Comparison of bias behavior and convergence across $p_s$ values}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To investigate the relationship between prior strength, bias, and computational cost in BIOD.
+
+    \subsubsection{Setup.}
+
+    \begin{itemize}
+        \item We vary prior strength $p_s$ from $10e0$ to $10e12$ in logarithmic increments of $10e0.5$.
+        \item For each $p_s$, we perform 10,000 iterations of the following:
+        \begin{itemize}
+            \item Draw a value $x$ from a uniform distribution $U(0, 1)$.
+            \item Determine range for the rate of failure based on the following piecewise function:
+            \[
+                failure_rate = \begin{cases}
+                [0.001, 0.01] & x < 0.1 \\
+                [0.01, 0.05] & 0.1 \le x < 0.3 \\
+                [0.05, 0.20] & 0.3 \le x < 0.65 \\
+                [0.20, 0.50] & 0.65 \le x < 0.9 \\
+                [0.50, 0.999] & x \ge 0.9
+                \end{cases}
+            \]
+            \item Draw a true failure probability $p_\text{fail, true}$ from a uniform distribution over the determined range.
+            \item Run BIOD using the failure rate found, noting the $pass\_ratio$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
+            \item Compute bias as $p_\text{fail, true} - pass\_ratio$.
+            \item Compute the fraction of initial $k$ actually performed: $\frac{k_\text{performed}}{k_\text{initial}}$.
+        \end{itemize}
+        \item Compute the mean and standard deviation of bias across all iterations.
+        \item Compute the mean and standard deviation of fraction of initial $k$ performed across all iterations.
+    \end{itemize}
+
+    \subsubsection{Definition of Metrics.}
+
+    \begin{itemize}
+        \item $p_s$: Prior strength parameter provided to BIOD.
+        \item $bias$: Difference between true failure probability and observed pass ratio. The mean of bias represents systematic error, while the standard deviation represents variability in the error.
+        \item $compute\_fraction$: Fraction of initial $k$ actually performed, representing computational cost.
+    \end{itemize}
+
+    \subsubsection{Hypothesis.}
+
+    We expect bias to remain centered around $0.0$, but its standard deviation to decrease as prior strength $p_s$ increases. We also expect computational cost to increase with prior strength, as higher $p_s$ values lead to larger initial $k$ estimates.
+
+    \subsubsection{Results.}
+
+    As shown in Figure~\ref{fig:ps_experiment3}, the mean bias remains centered around $0.0$ across all prior strength values tested, confirming part of our hypothesis.
+    
+    However, while the standard deviation of bias does decrease with increasing prior strength, there is a ceiling effect observed around $p_s = 10e7$ beyond which further increases in prior strength yielded no additional reduction in bias variability, while still increasing computational cost.
+
+    \subsubsection{Analysis / Interpretation.}
+
+    There appears to be a sigmoidal saturation effect in bias standard deviation with respect to both bias standard deviation and fraction of worst-case compute performed.
+
+    This suggests there exists an optimal prior strength value that balances bias reduction and computational cost, beyond which further increases in prior strength yield diminishing returns in bias improvement while incurring higher computational costs.
+
+    \subsubsection{Summary / Recommendation.}
+
+    Further analysis is needed to precisely identify the optimal prior strength value that minimizes bias variability while controlling computational cost.
+    
+\subsection{Experiment 7: Prior Strength Derivation} \label{sec:ps_experiment4}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{bias_hill_curves_chart}
+        \caption{The compute / accuracy tradeoff in selecting $p_s$. Compute used is in the fraction of $k_{initial}$ actually performed in simulation, Bias is in the standard deviation of bias observed. Markers indicate recommended values for $p_s$.}
+        \label{fig:ps_experiment4}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{p_s_table}
+        \caption{Table of optimal prior strength values for various balance factors $\beta$ weighing bias reduction vs computational cost, based on hill curve fits to the normalized standard deviation of bias and normalized fraction of worst-case compute performed data.}
+        \label{fig:ps_hill_fit}
+    \end{figure}
+
+    \paragraph{Objective.}
+    To use the results from the experiment in Section~\ref{sec:ps_experiment2_3} to derive a recommended prior strength value for BIOD based on desired bias characteristics.
+    Based on the monotonic, sigmoidal behavior observed, we selected the hill equation as a suitable model.
+
+    \subsubsection{Setup.}
+
+    For the curve fits below, we will use the following hill curve function \cite{Gesztelyi2012}:
+    \[
+        y = y_{\\min} + (y_{\\max} - y_{\\min}) \frac{x^n}{k^n + x^n}
+    \]
+    where:
+        \begin{itemize}
+            \item $y$: Normalized value at a given $p_s$.
+            \item $x$: Prior strength $p_s$.
+            \item $y_{\\min}$: Normalized value at $p_s = 1$.
+            \item $y_{\\max}$: Normalized value at $p_s = 10^{12}$.
+            \item $k$: Half-maximal effective concentration, representing the $p_s$ value at which saturation is at 50\%.
+            \item $n$: Hill coefficient, describing the steepness of the curve.
+        \end{itemize}
+
+    \begin{itemize}
+        \item Normalize the standard deviation of bias results to be a fraction of the maximum observed standard deviation across all prior strength values tested.
+        \item Fit the hill curve function above to the normalized standard deviation of bias data using non-linear least squares optimization to find the best-fit.
+        \item Fit the hill curve function above to the fraction of worst-case compute performed data using non-linear least squares optimization to find the best-fit.
+        \item Calculate the $r^2$ value for each fit to assess goodness of fit.
+        \item Introduce a balance factor $\beta$ and a Lagrangian objective function \cite{Everett1963} to weigh the importance of bias reduction vs computational cost:
+        \[
+            \text{objective}(p_s, \beta) = hill_{\text{bias}} - \beta \cdot hill_{\text{compute}}
+        \]
+        \item For a range of $200$ $\beta$ values in the logarithmic space from $10^{-5}$ to $10^{1}$, find the prior strength $p_s$ that minimizes the objective function.
+        \item Only consider solutions where $p_s$ is in the observed range of $10^{0}$ to $10^{12}$.
+        \item For each optimal $p_s$ found, find the error on $p_s$ using the delta method:
+        \[
+            \text{error}(p_s) = \frac{\sigma hill_{\text{bias}}^2 + (\beta \cdot \sigma hill_{\text{compute}}^2) }{\frac{\partial \text{objective}(p_s, \beta) }{\partial p_s}}
+        \]
+        \item Build a table of optimal $p_s$ values for each $\beta$ with the following columns:
+        \begin{itemize}
+            \item (1) $\beta$: Balance factor.
+            \item (2) $p_s$: Optimal prior strength for the given $\beta$.
+            \item (3) Normalized fraction of worst-case compute performed at optimal $p_s$.
+            \item (4) Normalized standard deviation of bias at optimal $p_s$.
+            \item (5) Delta between current and previous row's normalized fraction of worst-case compute performed.
+            \item (6) Delta between current and previous row's normalized standard deviation of bias.
+            \item (7) The error on $p_s$
+        \end{itemize}
+    \end{itemize}
+
+    \subsubsection{Definition of Metrics.}
+
+        \begin{itemize}
+            \item $p_s$: Prior strength parameter provided to BIOD.
+            \item Normalized standard deviation of bias: Standard deviation of bias normalized to the maximum observed standard deviation across all prior strength values tested.
+            \item Normalized fraction of worst-case compute performed: Fraction of worst-case compute performed normalized to the maximum observed fraction across all prior strength values tested.
+            \item $r^2$: Coefficient of determination for the hill curve fits, indicating goodness of fit.
+            \item $\beta$: Balance factor weighing bias reduction vs computational cost.
+            \item $n$, $k$: Hill curve parameters as defined above.
+            \item $p_{\text{s}, optimal}$ Recommendation prior strength for a given $\beta$.
+            \item error($p_{\text{s}, optimal}$): Estimated error on the recommended prior strength.
+        \end{itemize}
+
+    \subsubsection{Hypothesis.}
+
+    Based on the monotonic, sigmoidal behavior and apparent saturation effects observed in Section~\ref{sec:ps_experiment2_3}, we expect the hill equation to provide a good fit to both the normalized standard deviation of bias and normalized fraction of worst-case compute performed data, with fair $r^2$ values indicating strong goodness of fit.
+
+    We also expect to find a fairly wide range of optimal prior strength $p_s$ values corresponding to a flat region in bias, with the error on $p_s$ estimates being moderate, contributing to a wider recommendation range.
+
+    \subsubsection{Results.}
+
+    The hill curve fits yielded high $r^2$ values:
+    \begin{itemize}
+        \item Normalized standard deviation of bias fit: $r^2 = 0.9989$
+        \item Normalized fraction of worst-case compute performed fit: $r^2 = 0.9991$
+    \end{itemize}
+
+    The table of optimal prior strength $p_s$ values for various balance factors $\beta$ revealed a range of $p_s$ values corresponding to a flat region in bias where further increases in prior strength yielded minimal bias improvement while incurring higher computational costs.
+
+    It also revealed small errors (most $<0.5\%$) on the values of both fits, and by extension, on the recommended prior strength values.
+
+    The table shown in Figure~\ref{fig:ps_hill_fit} shows a value of $p_s = 3.35 \times 10^{6} \pm 1.98 \times 10^{4}$ 
+    provides a good balance between bias reduction and computational cost, yielding a normalized standard deviation of bias of $0.052$ and a normalized fraction of worst-case compute performed of $0.76$.
+
+    \subsubsection{Analysis / Interpretation.}
+
+    Both $r^2$ exceeding $0.998$ confirm the hill equation is an excellent model for both the normalized standard deviation of bias and normalized fraction of worst-case compute performed data. The tight errors on the fits further reinforce the reliability of the model.
+
+    The table of optimal prior strength $p_s$ values indicates a practical range for selecting $p_s$ where the change in bias reduction becomes negligible compared to the increase in computational cost, allowing users to make informed decisions based on their specific bias tolerance and compute resource constraints.
+
+    The recommended value provides an option where increasing $p_s$ to the maximum reasonable value yields $~5\%$ improvement in bias standard deviation at the cost of $~24\%$ increase in computational cost.
+
+    The $\beta = 0.51$ finding at the suggested $p_s$ corresponds to a value determining the relative importance of bias reduction vs computational cost, that compute here is roughly half as important as bias reduction.
+
+    \subsubsection{Summary / Recommendation.}
+    
+    We recommend a prior strength value of $p_s = 3.35 \times 10^{6} \pm 1.98 \times 10^{4}$ for BIOD, balancing bias reduction and computational cost effectively for most applications.
+
+    The small errors on both the curve fits and recommended prior strength values provide confidence in the reliability of this recommendation.

@@ -1,0 +1,42 @@
+\begin{minipage}{0.55\textwidth}
+  \centering
+  % Graph
+  \begin{tikzpicture}
+    \begin{axis}[
+        xlabel={$C$},
+        ylabel={$k_{\text{floor}}$},
+        legend pos=south east,
+        grid=major,
+        width=\textwidth,
+        height=7cm,
+        filter discard warning=false,
+        scaled y ticks = false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+        scaled x ticks = false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+    ]
+      \pgfplotstableread[col sep=comma]{results/damping_experiment1.csv}\datatable
+      \pgfplotsinvokeforeach{0.8,0.9,0.95,0.99}{
+          \addplot+[
+              thick,
+              mark=none,
+              restrict expr to domain={\thisrow{q}}{#1:#1},
+          ] table[x=C,y=k_floor]{\datatable};
+          \addlegendentry{$q = #1$}
+      }
+    \end{axis}
+  \end{tikzpicture}
+\end{minipage}%
+\hfill
+\begin{minipage}{0.4\textwidth}
+  \centering
+  % Table
+  \pgfplotstabletypeset[
+      col sep=comma,
+      header=true,
+      columns={Cq,0.8,0.9,0.95,0.99},
+      columns/Cq/.style={column name={$C \backslash q$}},
+      every head row/.style={before row=\toprule, after row=\midrule},
+      every last row/.style={after row=\bottomrule},
+  ]{results/damping_experiment2.csv}
+\end{minipage}

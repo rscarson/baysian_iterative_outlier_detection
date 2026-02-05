@@ -1,0 +1,68 @@
+
+\begin{tikzpicture}
+  \begin{axis}[
+        xlabel={$p_s$},
+        ylabel={Fraction},
+        legend pos=south west,
+        legend style={
+          font=\scriptsize,
+          row sep=2pt
+        },
+        grid=both,
+        minor tick num=4,
+        minor grid style={gray!1, thin},
+        width=15cm,
+        height=8cm,
+        filter discard warning=false,
+        scaled y ticks = false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+        scaled x ticks = false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        xmode=log,
+        log basis x=10
+  ]
+
+    \pgfplotstableread[col sep=comma]{results/bias_experiment4_perf.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+        error bar style={line width=1pt},
+        error mark options={
+          mark size=1pt,
+          line width=1pt
+        }
+    ] table[
+        x=p_s,
+        y=fraction,
+        y error=error,
+    ]{\datatable};
+    \addlegendentry{Compute Used}
+
+    \pgfplotstableread[col sep=comma]{results/bias_experiment4_bias.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+        error bar style={line width=1pt},
+        error mark options={
+          mark size=1pt,
+          line width=1pt
+        }
+    ] table[
+        x=p_s,
+        y=fraction,
+        y error=error,
+    ]{\datatable};
+    \addlegendentry{Bias Standard Error}
+
+    \addplot+[purple, thick, dashed] coordinates {(3.35e6,0) (3.35e6,1)};
+    \addlegendentry{($p_s = 3.35 \times 10^6$ \pm $1.98 \times 10^4$)}
+    
+    \pgfplotstableread[col sep=comma]{results/bias_experiment4_balance_points.csv}\datatable
+  \end{axis}
+\end{tikzpicture}

@@ -1,0 +1,77 @@
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+        xlabel={$p_s$},
+        ylabel={Bias},
+        grid=both,
+        minor tick num=4,
+        minor grid style={gray!10, thin},
+        width=0.95\textwidth,
+        height=6cm,
+        filter discard warning=false,
+        scaled y ticks=false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+        scaled x ticks=false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        xmode=log,
+        xmin=1e0,
+        xmax=1e10,
+        log basis x=10
+]
+    \pgfplotstableread[col sep=comma]{results/bias_experiment2.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+    ] table[
+        x=p_s,
+        y=mean_bias,
+        y error plus=stdev_bias,
+        y error minus=stdev_bias,
+    ]{\datatable};
+\end{axis}
+\end{tikzpicture}
+\subcaption{Bias vs increasing $p_s$}
+\label{fig:ps_experiment2}
+\end{minipage}
+\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+        xlabel={$p_s$},
+        ylabel={Compute Used},
+        grid=both,
+        minor tick num=4,
+        minor grid style={gray!10, thin},
+        width=0.95\textwidth,
+        height=6cm,
+        filter discard warning=false,
+        scaled y ticks=false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        scaled x ticks=false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        xmode=log,
+        xmin=1e0,
+        xmax=1e10,
+        log basis x=10
+]
+    \pgfplotstableread[col sep=comma]{results/bias_experiment3.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+    ] table[
+        x=p_s,
+        y=mean_iterations,
+        y error plus=stdev_iterations,
+        y error minus=stdev_iterations,
+    ]{\datatable};
+\end{axis}
+\end{tikzpicture}
+\subcaption{$\frac{iterations}{k_{initial}}$ vs $p_s$}

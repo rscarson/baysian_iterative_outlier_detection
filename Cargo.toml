@@ -1,0 +1,10 @@
+[package]
+name = "baysian_iterative_outlier_detection"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+biod = { path = "rust_impl" }
+rand = "0.9"
+rand_distr = "0.5"
+csv = "1.4.0"

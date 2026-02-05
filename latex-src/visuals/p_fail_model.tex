@@ -1,0 +1,40 @@
+\begin{tikzpicture}
+  \begin{axis}[
+        xlabel={$n$},
+        ylabel={$p\_\text{fail}$},
+        legend pos=south east,
+        grid=both,
+        minor tick num=4,
+        minor grid style={gray!10, thin},
+        width=15cm,
+        height=8cm,
+        filter discard warning=false,
+        scaled y ticks = false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+        scaled x ticks = false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        xmode=log,
+        log basis x=10
+  ]
+
+    \pgfplotstableread[col sep=comma]{results/p_fail_experiment1.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+    ] table[
+        x=n,
+        y=p_fail_simulated,
+    ]{\datatable};
+    \addlegendentry{Simulated True $p\_\text{fail}$}
+
+    \pgfplotstableread[col sep=comma]{results/p_fail_experiment1.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+    ] table[
+        x=n,
+        y=p_fail_predicted,
+    ]{\datatable};
+    \addlegendentry{Conservative Estimate $p\_\text{fail}$}
+  \end{axis}
+\end{tikzpicture}

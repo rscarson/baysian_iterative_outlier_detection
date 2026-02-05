@@ -1,0 +1,102 @@
+% !TEX TS-program = lualatex
+
+% Suppress LuaTeX console output, which can be very verbose - lets me see actual LaTeX warnings/errors
+\directlua{
+    function be_quiet ()
+    end
+
+    luatexbase.add_to_callback('start_run', be_quiet, 'stop start run')
+    luatexbase.add_to_callback('stop_run', be_quiet, 'stop stop run')
+    luatexbase.add_to_callback('start_page_number', be_quiet, 'stop start page')
+    luatexbase.add_to_callback('stop_page_number', be_quiet, 'stop stop page')
+    luatexbase.add_to_callback('start_file', be_quiet, 'stop start file')
+    luatexbase.add_to_callback('stop_file', be_quiet, 'stop stop file')
+}
+
+\documentclass[12pt]{article}
+
+\usepackage{silence}
+\ErrorFilter{latex}{Reference}
+
+\usepackage{import}
+
+% Packages
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{booktabs}     % tables
+\usepackage{geometry}     % page layout
+\usepackage{hyperref}     % links
+\geometry{margin=1in}
+
+% Code highlighting
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+  showstringspaces=false,  % <- hides the scoopy boxes
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  frame=single
+}
+
+\usepackage{fontspec}   % LuaTeX — good Unicode fonts
+\usepackage{microtype}  % better typography
+\usepackage{siunitx}    % number alignment and scientific notation
+\usepackage{caption}    % multi-paragraph captions & justification
+\captionsetup{justification=raggedright,singlelinecheck=false}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable, booktabs, subcaption}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{fillbetween}  % Required for \addplot fill between
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\setlength{\parskip}{0.5em} % space between paragraphs
+\setlength{\parindent}{1em} % paragraph indentation
+
+\usepackage{enumitem}
+\setlist[description]{
+    leftmargin=*,            % align with normal paragraph text
+    labelindent=\parindent,  % indent label by normal paragraph indent
+    itemsep=0.3em,
+    topsep=0.5em
+}
+
+% Title info
+\title{How Many Iterations are Enough? Bayesian Iterative Outlier Detection for Conservative Randomized Testing}
+\author{Richard Carson}
+\date{\today}
+
+\begin{document}
+
+    \maketitle
+
+    \begin{abstract}
+        It is a common problem in software testing to determine how many iterations of a randomized test are required to achieve a desired confidence level that edge cases have been adequately covered. Traditional approaches often rely on fixed iteration counts based on heuristic estimates of failure probabilities, which can lead to either insufficient testing or excessive computational costs, or on fuzzing techniques that may not be suitable for use in continuous integration (CI) pipelines due to their resource intensity.
+        
+        Especially for numerical software, where failures may be caused by outliers in the data set, synthetic data with known outlier distributions are often used to evaluate robustness. However, determining the appropriate number of test iterations in such scenarios remains a challenge.
+
+        Our method bridges the gap between sequential analysis and Bayesian methods by providing a Bayesian iterative approach to outlier detection in randomized testing, allowing for adaptive determination of test duration based on observed failure rates and prior knowledge of outlier distributions. This approach not only enhances the reliability of test outcomes but also optimizes resource utilization by tailoring the number of test iterations to the specific characteristics of the data set and the testing environment.
+
+        This paper introduces the Bayesian Iterative Outlier Detection (BIOD) algorithm, and demonstrates that it can effectively balance computational cost with confidence in results, even when parameters are poorly specified. Empirical evaluation shows that BIOD accurately models failure rates under independent, normally distributed errors, making it suitable for resource-constrained settings such as CI pipelines.
+    \end{abstract}
+
+    \input{latex-src/1_introduction.tex}
+    \input{latex-src/2_solution.tex}
+    \input{latex-src/3_methodology.tex}
+    \input{latex-src/4_results.tex}
+    \input{latex-src/5_discussion.tex}
+    \input{latex-src/6_conclusion.tex}
+    \input{latex-src/7_appendix.tex}
+
+\end{document}

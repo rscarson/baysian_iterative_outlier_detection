@@ -1,0 +1,50 @@
+\begin{tikzpicture}[node distance=2cm, 
+    startstop/.style={rectangle, rounded corners, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=red!30},
+    process/.style={rectangle, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=blue!20},
+    decision/.style={diamond, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=green!20, aspect=2},
+    arrow/.style={thick,->,>=stealth}
+]
+
+    % Nodes
+    \node (start) [startstop] {Determine initial $k$};
+    \node (dec1) [decision, below of=start] {Iterations $>$ $k$?};
+    \node (stop) [process, right of=dec1, xshift=4cm] {Stop};
+    \node (win) [decision, below of=stop] {$r_{\text{obs}} \ge r_{\text{pass}}$?};
+    \node (failed) [startstop, below of=win, xshift=-2cm] {Failed};
+    \node (passed) [startstop, below of=win, xshift=2cm] {Passed};
+    \node (run) [process, below of=dec1] {Run test};
+    \node (dec2) [decision, below of=run] {Success?};
+    \node (update_p) [process, below of=dec2] {Update $p_{fail}$};
+    \node (update_k) [process, left of=update_p, xshift=-2.5cm] {Update $k$};
+
+    % Arrows
+
+    \draw [arrow] (start) -- (dec1);
+
+    \draw [arrow] (dec1.east) -- (stop.west)
+        node[midway, above] {Yes};
+
+    \draw [arrow] (stop.south) -- (win.north);
+
+    \draw [arrow] (win.south west) -- (failed.north)
+        node[midway, left] {No};
+
+    \draw [arrow] (win.south east) -- (passed.north)
+        node[midway, left] {Yes};
+
+    \draw [arrow] (dec1.south) -- (run.north)
+        node[midway, left] {No};
+
+    \draw [arrow] (run.south) -- (dec2.north);
+
+    \draw [arrow] (dec2.west) -| ++(-8mm,8mm) |- (dec1.south west)
+        node[pos=0.25, left] {Yes};
+
+    \draw [arrow] (dec2.south) -- (update_p.north)
+        node[midway, right] {No};
+
+    \draw [arrow] (update_p.west) -- (update_k.east);
+    
+    \draw [arrow] (update_k.north) |- (dec1.west);
+
+\end{tikzpicture}

@@ -1,0 +1,294 @@
+\section{Proposed Solution}
+\subsection{Bayesian Iterative Outlier Detection}
+
+\begin{figure}[ht!]
+    \centering
+    \import{latex-src/visuals}{flowchart}
+    \caption{Flowchart of the BIOD testing procedure.}
+    \label{fig:biod_flowchart}
+\end{figure}
+
+We propose a modified Bayesian approach towards the probability of failure in any given data set, and a frequentist stopping criterion based on achieving a desired confidence level that sufficient iterations have been performed to catch edge cases caused by extreme outliers.
+
+The algorithm takes the following parameters:
+\begin{description}[labelwidth=2em, leftmargin=!]
+    \item[$n$] The size of the data set under test.
+    \item[$p$] The probability of any individual point being an extreme outlier, chosen very conservatively.
+    \item[$q$] The desired confidence that enough iterations have been performed to detect a theoretical bug caused by an extreme outlier.
+    \item[$r_{\text{pass}}$] The required ratio of data sets tested to pass for the overall procedure to be considered successful.
+\end{description}
+
+It also makes use of a pair of constants, used to tune the behaviour of the model. Derivations for suggested values are included below, in section \ref{sec:derivations}:
+\begin{description}[labelwidth=5em, leftmargin=!]
+    \item[$C = 1.864$] A damping constant reflecting the diminishing impact of additional data points on the likelihood of failure due to extreme outliers
+    \item[$p_s = 4.43e5$] A strength parameter for the Bayesian prior, reflecting the confidence in the initial estimate of the failure probability
+\end{description}
+
+The user-defined risk parameters are the most critical to the success of the algorithm, as they directly impact the number of iterations required to achieve the desired confidence level. $p$ should be chosen to be a very conservative underestimate of the true pointwise probability of extreme outliers, to ensure that the algorithm does not underestimate the required number of iterations. $q$ should be chosen based on the user's tolerance for risk, with higher values indicating a lower tolerance for risk. Overestimating $p$ can affect accuracy, while underestimation affects only worst-case compute.
+
+For many users with standard use cases, $q$, the desired confidence level, and $r_{\text{pass}}$, the required pass ratio, could be conflated, since they both reflect differing aspects of the user's tolerance for risk. However they are kept separate to allow for more advanced use cases where the user may wish to set a high confidence level for catching edge cases, but a lower pass ratio to allow for known issues in the data set. The advantage of this is that the user can be more certain that any failures observed are due to real issues, rather than random chance.
+
+The sections below describe the 3-phase approach for the BIOD method.
+
+\subsubsection{Estimation Phase}
+Given $n$ the number of items per set, and $p$ the pointwise lower-bound estimate for outlier frequency, we calculate an initial conservative estimate for the setwise probability of failure $p_\text{fail}$:
+\begin{align}
+p' = \frac{p}{(1 + C \cdot n \cdot p)}, 
+p_{\text{fail}} = 1 - (1 - p')^n
+\end{align}
+
+$p'$ is used to model the saturation of the effect of individual outliers on setwise failure. It represents the inverse relationship $\frac{1}{np}$ between number of expected outliers, and the effects of interations between them. For more on the derivation of this form, and the recommended value for $C = 1.864 $, see Section \ref{sec:derivation_c}.
+
+For small $n$ the probability of failure is roughly linear in $n$, consistent with a binomial model where $p_{\text{fail}} \approx 1 - (1 - p)^n$. As $n$ becomes large, the damping fraction saturates, and the effective failure probability approaches a limiting value $p_{\text{fail}} = 1 - e^{-1/C}$. In this regime, the number of failures per iteration can be approximated by a Poisson distribution with $\lambda = \frac{1}{C}$, reflecting the diminishing returns of increasing data set size on the likelihood of failure due to extreme outliers.
+
+An initial estimate for the number of iterations $k$ required to achieve the desired confidence $q$ of having seen at least one failure can then be computed as:
+\begin{align}
+k = \left\lceil \frac{\ln(1 - q)}{\ln(1 - p_{\text{fail}})} \right\rceil
+\end{align}
+
+Where $p_{\text{fail}}$ is the probability of any single data set failing the test.
+
+Finally, Bayesian priors for $p_{\text{fail}}$ are calculated using $p_s$:
+\begin{align}
+\alpha = p_{\text{fail}} \cdot p_s, \qquad
+\beta = (1 - p_{\text{fail}}) \cdot p_s
+\end{align}
+
+For more on the derivation of this form, and the recommended value for $p_s = 4.43e5$, see Section \ref{sec:derivation_ps}.
+
+
+\subsubsection{Iterative Testing Phase}
+
+In this phase we will track the following variables:
+\begin{description}[labelwidth=2em, leftmargin=!]
+    \item[$k$] The current estimate for iterations required to achieve the given confidence
+    \item[$\alpha, \beta$] The priors for our Bayesian updates
+    \item[$iterations$] The number of iterations performed so far
+    \item[$passes$] The number of successful iterations
+    \item[$passes\_since\_failure$] A tally of successes since the last failure
+\end{description}
+
+The test involves running a blackbox testing routine on a new set of size $n$ in each iteration. We recommend each test utilize a seeded transform on an initial input set.
+
+For each iteration, we first verify if $iterations \ge k$. If so, the test has ended and we move on to the output phase. We also check if a predetermined timeout has elapsed - if so, the testing process ends in failure, as there is insufficient evidence to support a claim.
+
+Otherwise, we increment $iterations$, and perform the blackbox test on the next set; it should determine if a given set passes or fails.
+
+If the set passes, we increment $passes$ and $passes\_since\_failure$ and repeat the procedure. If the set fails, we update our estimates:
+\begin{itemize}
+    \item Increment $alpha$, to represent the detected failure
+    \item Perform $\beta += passes\_since\_failure, passes\_since\_failure = 0$
+    \item Recalculate the estimated setwise failure risk: $p_{\text{fail}} = \frac{\alpha}{\alpha + \beta}$
+    \item Update the number of iterations required: $k = \left\lceil \frac{\ln(1 - q)}{\ln(1 - p_{\text{fail}})} \right\rceil$
+    \item Repeat the iteration procedure
+\end{itemize}
+
+\subsubsection{Output Phase}
+
+We can calculate the observed ratio of passes to failures $r_obs$ as:
+\begin{align}
+    r_\text{obs} = \frac{\text{total passes}}{\text{total iterations}}
+\end{align}
+
+If $r_\text{obs} >= r_{\text{pass}}$, the test passes.
+
+Due to the strong priors used in the Bayesian updates, the final beta distribution will be heavily influenced by the initial estimate of $p_{\text{fail}}$, and thus will not reflect the observed pass ratio. Thus, we can use a new beta distribution to calculate a credible interval for $p_{\text{fail}}$ based on the observed data alone, only using the lower bound - since the upper bound estimate will have been biased by the sample size calculated using our conservative initial estimate.
+
+\begin{align}
+    p_{\text{fail,lower}} &= F^{-1}\left(\frac{1 - q}{2}; \text{total failures} + 1, \text{total passes} + 1\right) \\
+\end{align}
+
+where $F^{-1}$ is the Beta quantile function.
+
+The outputs for the test are:
+\begin{itemize}
+    \item The test result: pass / fail
+    \item $r_\text{obs}$, the observed pass ratio
+    \item The calculated lower bound on $p_{\text{fail, true}}$ given $q$
+\end{itemize}
+
+These can be communicated succinctly as:
+``$[100 \times r_\text{obs}]\%$ of tests passed. $[100 \times q]\%$ confidence that the true failure rate among datasets is at least $p_{\text{fail,lower}}$.''
+
+\subsection{Limitations}
+
+The proposed method has several limitations and assumptions worth noting: \begin{itemize}
+    \item The size of the data set $n$ must be known in advance, and should remain constant throughout the testing process.
+    \item The method assumes that the probability of extreme outliers is independent and identically distributed across the data set, which may not hold true in all cases.
+    \item Very small $n$ ($< 100$) require a very large number of iterations to converge; this is an expected biproduct of the model used, and we therefore recommend $n >= 100$
+\end{itemize}
+
+\subsection{Derivations}\label{sec:derivations}
+
+\subsubsection{The Damping Constant - C}\label{sec:derivation_c}
+
+As $n$ increases, the naiive binomial form $p_{\text{fail}} = 1 - (1 - p')^n$ for expected failure trends to $100\%$. 
+To resolve this, we introduce the damping fraction $p' = \frac{p}{(1 + C \cdot n \cdot p)}$
+
+We began with the form 
+\begin{align}
+    p' = \frac{p}{n \dot p}
+\end{align}
+
+In order to eliminate the undefined case at $n = 0$, and to ensure that $p' > p$ in all cases, we modified this to the form:
+\begin{align}
+    p' = \frac{p}{(1 + n \cdot p)}
+\end{align}
+
+And finally introduced the constant $C$ to allow for tuning of the saturation effect:
+\begin{align}
+    p' = \frac{p}{(1 + C \cdot n \cdot p)}
+\end{align}
+
+$C$ represents the binding strength modulating between outliers, and thus the rate of saturation of the effect of increasing $n$ on $p_{\text{fail}}$.
+
+The effect is the introduction of a asymptotic floor on the minimum number of iterations required for a set as $n \to \infty$, $k_{\text{floor}}$.
+
+To find a reasonable value for $C$, we define the reasonable universe of parameters for the test space.
+For a theoretical set of infinite size, there is naturally a minimum number of iterations under which the test is not useful - $k_{\text{floor}}$.
+There is also a practical maximum number, above which the computation required for extremely large sets becomes infeasible.
+
+We will define that practical range for $k_{\text{floor}}$ to be between 3 and 10 iterations, and the we will define the lowest confidence $q$ we consider reasonably conservative to be $0.8$.
+
+We we can analyze the effect of $C$ effect on $k_{\text{floor}}$ as n approaches infinity:
+\begin{align}
+    p' &= \frac{p}{1 + C n p} \\
+    p_{\text{fail}} &= 1 - (1 - p')^n
+\end{align}
+
+For large $n$, $(1 - p')^n \to e^{-n p'}$, so
+
+\begin{align}
+    p_{\text{fail}} &= 1 - e^{- \frac{n p}{1 + C n p}} 
+    = 1 - e^{-\frac{1}{C} \cdot \frac{C n p}{1 + C n p}}
+\end{align}
+
+As $n \to \infty$, $\frac{C n p}{1 + C n p} \to 1$, giving us $p_{\text{fail}} = 1 - e^{-1/C}$
+
+Then
+
+\begin{align}
+    k &= \frac{\ln(1 - q)}{\ln(1 - p_{\text{fail}})} 
+    \quad \Rightarrow \quad
+    k_{\text{floor}} = \frac{\ln(1 - q)}{\ln(e^{-1/C})} 
+    = \frac{\ln(1 - q)}{-1/C} 
+    = - C \ln(1 - q)
+\end{align}
+
+Solving for $C$:
+
+\begin{align}
+    C = \frac{k_{\text{floor}}}{- \ln(1 - q)}
+\end{align}
+
+
+If we set $k_{\text{floor}} = 3$ as a reasonable minimum number of iterations that could be considered useful for a lower-bound on the value for $q$ we consider reasonably conservative of $q = 0.8$, we find:
+\[
+C = \frac{k_{\text{floor}}}{- \ln(1 - q)} 
+\quad \Rightarrow \quad 
+C = \frac{3}{- \ln(1 - 0.8)} \approx 1.864
+\]
+
+Additionally, since $k_{\text{floor}} = -C \times \ln(1 - q)$, we can measure the effect of varying $C$ on $k_{\text{floor}}$ for a given q:
+\begin{align*}
+k_{\text{floor}} &= - C \, \ln(1 - q) \\[2mm]
+k_{\text{floor}} &= - (1.864 - 0.5) \, \ln(1 - 0.8) \approx 2.19527 \\ 
+k_{\text{floor}} &= - (1.864) \, \ln(1 - 0.8) \approx 2.99999 \\ 
+k_{\text{floor}} &= - (1.864 + 0.5) \, \ln(1 - 0.8) \approx 3.80471
+\end{align*}
+
+Taking into account the effect of ceil in the true calculation of $k_{\text{initial}}$, we can see that variations in $C$ of approximately $\pm 0.5$ around the nominal value of 1.864
+produces a difference of approximately $\pm 1$ in the final value, showing that this method is reasonably robust to small variations in $C$.
+
+We will therefore recommend $C = 1.864$ as the nominal value for the damping constant.
+
+To verify this value, we generated the $k_{\text{floor}}$ produced by a variety of values within the defined parameters space, and then took $C_{\text{mean}}$ and $C_{\sigma}$ to produce the table and graph shown in Figure \ref{fig:graph_table}.
+
+From the table we can see that the $C \approx 1.8$ produces values right in our defined practical range for $k_{\text{floor}}$ across a variety of confidence levels, confirming our derived value.
+
+If a usecase requires a different practical range for $k_{\text{floor}}$ or $q$, a value for $C$ should be selected using the formula above (13).
+
+\subsubsection{Prior Strength - ps}\label{sec:derivation_ps}
+
+\textbf{Isolating the effects of parameters on bias}
+
+Our first step to determining a reasonable $p_s$ for a given model was to run the experiment described in Section \ref{sec:ps_experiment1}, varying $p_{\text{fail}}$ and $r_{\text{pass}}$ over the base-case of $p_s = 1$, to determine if either parameter had a significant effect on bias.
+
+These parameters were chosen since they are calculated directly from $n$ and $p$, and thus would allow us to infer the effect of those parameters on bias.
+
+For this and all experiments in this section we define bias as the difference between the test's observed pass ratio $r_\text{obs}$, and the true underlying pass rate for the simulated trial, $r_\text{true}$
+\begin{align}
+    \text{bias} = r_\text{obs} - r_\text{true}
+\end{align}
+
+A positive bias indicates the test overestimated the pass rate (false negative), while a negative bias indicates the test underestimated the pass rate (false positive).
+
+Our hypothesis was that the delta between the expected level of failure $p_fail$ and the acceptable level of failure $1 - r_\text{pass}$ would be a good predictor of bias.
+
+However, as can be seen in Figure \ref{fig:ps_experiment1}, neither parameter had a measurable effect on bias - which appeared to be randomly distributed around 0 witha constant error regardless of the values of $p_{\text{fail}}$ and $r_{\text{pass}}$. Since $p_{\text{fail}}$ encodes for $k$, and contains both $n$ and $p$, we can infer that none of $n$, $p$, $p_{\text{fail}}$, or $k$ have a significant effect on bias, which appears to be a set function for any inputs into the model given an unknown underlying failure rate.
+
+\textbf{Effect of prior strength on bias and compute}
+
+Our next step was to run a simplified experiment varying only $p_s$, shown in Figure \ref{fig:ps_experiment2} (a), to determine the effect of $p_s$ on bias. This demonstrated the bias was indeed centered at $0$, with a variance that decreased with increasing $p_s$, plateauing near $p_s = 1e7$.
+
+We next ran the same experiment measuring the fraction of initially estimated iterations required to converge at various values of $p_s$, shown in Figure \ref{fig:ps_experiment3} (b). This demonstrated that increasing $p_s$ also increased the required computation, again reaching an asymptotic limit, this time around $p_s = 1e8$.
+
+\textbf{Modeling the tradeoff between bias and compute}
+
+Following Experiment 3, we fit the relationship between the performed fraction of maximum iterations and $p_s$ to a pair of Hill equations \cite{Gesztelyi2012} of the form:
+\begin{align}
+    y = y_{min} + (y_{max} - y_{min}) \frac{x^n}{k^n + x^n}
+\end{align}
+
+Where:
+\begin{itemize}
+    \item $y$ is the observed variable (bias stddev or compute fraction)
+    \item $x$ is $p_s$, the prior strength
+    \item $n$ is the Hill coefficient, which determines the steepness of the curve
+    \item $k$ is the value of $x$ at which $y$ reaches half of its maximum value
+    \item $y_{min}$ and $y_{max}$ are the starting and ending values of $y$ as $x$ increases
+\end{itemize}
+
+Bias was first normalized to the maximum observed value, and compute was already a fraction of the maximum, making both variables suitable for fitting to this form. 
+
+The hill curve was chosen due to the need for a monotonic, saturating sigmoid function.
+
+This resulted in a good fit for both bias and compute ($R^2 > 0.998$ for both curves).
+
+The fits had the following parameters:
+\begin{itemize}
+    \item Bias
+    \begin{itemize}
+        \item $n = 0.548$
+        \item $k = 4.77 \times 10^4$
+        \item $y_{min} = 1.0$
+        \item $y_{max} = 0.323$
+    \end{itemize}
+    \item Compute
+    \begin{itemize}
+        \item $n = 0.639$
+        \item $k = 6.70 \times 10^5$
+        \item $y_{min} = 0.111$
+        \item $y_{max} = 1.0$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Selecting a recommended prior strength}
+
+We then defined a Lagrangian objective function \cite{Everett1963} to balance the competing goals of minimizing bias and minimizing compute, introducing $\beta$, the tradeoff coefficient between the two objectives representing the relative importance of compute savings versus bias reduction:
+
+\begin{align}
+    objective_{score}(p_s) = bias_{std}(p_s) - \beta \times compute_{frac}(p_s)
+\end{align}
+
+By sweeping $\beta$ over logarithmic space from $10^{-5}$ to $10^1$, or in other words, from a strong preference for minimizing bias to an equal weighting of both objectives, and solving for the root of the objective function, we can build a table of optimal $p_s$ values for various tradeoff preferences.
+
+The result, shown in Figure \ref{fig:ps_hill_fit}, demonstrates a flat region of optimal $p_s$ values centered at $3.35 \times 10^{6}$, in which bias becomes relatively insensitive to $p_s$, while compute savings continue to improve significantly as $p_s$ decreases.
+
+The tradeoff curve and suggested optimal value are shown in Figure \ref{fig:ps_experiment4}.
+
+We therefore recommend a nominal value of $p_s = 3.35 \times 10^{6} \pm 1.98 \times 10^{4}$ for a good balance between compute and bias. Compared to the largest reasonable value of $p_s = 1e7$, this value results in only a $~3\%$ increase in bias stddev, while saving $~24\%$ of worst-case compute. By comparison, the less conservative value of $p_s = 4.43e5$ results in a $~12\%$ increase in bias stddev, while saving $~39\%$ of worst-case compute.
+
+The recommendation corresponds to $\beta = 0.51$, meaning that compute savings are considered roughly half as important as bias reduction.
+
+It is noteworthy that since compute is a fraction of the initially estimated iterations actually completed, this will already scale with $n$; The larger the set size, the greater the potential savings as compared to the initially estimated worst-case compute. Thus, this recommended value for $p_s$ should be robust across a wide range of $n$ values.

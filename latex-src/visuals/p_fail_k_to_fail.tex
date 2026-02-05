@@ -1,0 +1,45 @@
+\begin{tikzpicture}
+  \begin{axis}[
+        xlabel={$n$},
+        ylabel={$k$},
+        legend pos=north east,
+        grid=both,
+        minor tick num=4,
+        minor grid style={gray!10, thin},
+        width=15cm,
+        height=8cm,
+        filter discard warning=false,
+        scaled y ticks = false,
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+        scaled x ticks = false,
+        xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        xmode=log,
+        log basis x=10
+  ]
+
+    \pgfplotstableread[col sep=comma]{results/p_fail_experiment2.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+        error bars/.cd,
+            y dir=both,
+            y explicit,
+    ] table[
+        x=n,
+        y=k_obs_mean,
+        y error plus=k_obs_stdev,
+        y error minus=k_obs_stdev,
+    ]{\datatable};
+    \addlegendentry{Simulated $k$ to observed failure}
+
+    \pgfplotstableread[col sep=comma]{results/p_fail_experiment2.csv}\datatable
+    \addplot+[
+        thick,
+        mark=none,
+    ] table[
+        x=n,
+        y=k_predicted,
+    ]{\datatable};
+    \addlegendentry{Predicted $k$ to observed failure}
+  \end{axis}
+\end{tikzpicture}
