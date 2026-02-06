@@ -108,7 +108,7 @@ The outputs for the test are:
 \end{itemize}
 
 These can be communicated succinctly as:
-``$[100 \times r_\text{obs}]\%$ of tests passed. $[100 \times q]\%$ confidence that the true failure rate among datasets is at least $p_{\text{fail,lower}}$.''
+``$[100 \cdot r_\text{obs}]\%$ of tests passed. $[100 \cdot q]\%$ confidence that the true failure rate among datasets is at least $p_{\text{fail,lower}}$.''
 
 \subsection{Limitations}
 
@@ -189,7 +189,7 @@ C = \frac{k_{\text{floor}}}{- \ln(1 - q)}
 C = \frac{3}{- \ln(1 - 0.8)} \approx 1.864
 \]
 
-Additionally, since $k_{\text{floor}} = -C \times \ln(1 - q)$, we can measure the effect of varying $C$ on $k_{\text{floor}}$ for a given q:
+Additionally, since $k_{\text{floor}} = -C \cdot \ln(1 - q)$, we can measure the effect of varying $C$ on $k_{\text{floor}}$ for a given q:
 \begin{align*}
 k_{\text{floor}} &= - C \, \ln(1 - q) \\[2mm]
 k_{\text{floor}} &= - (1.864 - 0.5) \, \ln(1 - 0.8) \approx 2.19527 \\ 
@@ -260,14 +260,14 @@ The fits had the following parameters:
     \item Bias
     \begin{itemize}
         \item $n = 0.548$
-        \item $k = 4.77 \times 10^4$
+        \item $k = 4.77 \cdot 10^4$
         \item $y_{min} = 1.0$
         \item $y_{max} = 0.323$
     \end{itemize}
     \item Compute
     \begin{itemize}
         \item $n = 0.639$
-        \item $k = 6.70 \times 10^5$
+        \item $k = 6.70 \cdot 10^5$
         \item $y_{min} = 0.111$
         \item $y_{max} = 1.0$
     \end{itemize}
@@ -278,16 +278,16 @@ The fits had the following parameters:
 We then defined a Lagrangian objective function \cite{Everett1963} to balance the competing goals of minimizing bias and minimizing compute, introducing $\beta$, the tradeoff coefficient between the two objectives representing the relative importance of compute savings versus bias reduction:
 
 \begin{align}
-    objective_{score}(p_s) = bias_{std}(p_s) - \beta \times compute_{frac}(p_s)
+    \operatorname{objective\_score}(p_s)
+    &= \operatorname{bias\_std}(p_s)
+     - \beta \cdot \operatorname{compute\_frac}(p_s)
 \end{align}
 
 By sweeping $\beta$ over logarithmic space from $10^{-5}$ to $10^1$, or in other words, from a strong preference for minimizing bias to an equal weighting of both objectives, and solving for the root of the objective function, we can build a table of optimal $p_s$ values for various tradeoff preferences.
 
-The result, shown in Figure \ref{fig:ps_hill_fit}, demonstrates a flat region of optimal $p_s$ values centered at $3.35 \times 10^{6}$, in which bias becomes relatively insensitive to $p_s$, while compute savings continue to improve significantly as $p_s$ decreases.
+The result, shown in Figure \ref{fig:ps_hill_fit}, demonstrates a flat region of optimal $p_s$ values centered at $3.35 \cdot 10^{6}$, in which bias becomes relatively insensitive to $p_s$, while compute savings continue to improve significantly as $p_s$ decreases. The tradeoff curve and suggested optimal value are shown in Figure \ref{fig:ps_experiment4}.
 
-The tradeoff curve and suggested optimal value are shown in Figure \ref{fig:ps_experiment4}.
-
-We therefore recommend a nominal value of $p_s = 3.35 \times 10^{6} \pm 1.98 \times 10^{4}$ for a good balance between compute and bias. Compared to the largest reasonable value of $p_s = 1e7$, this value results in only a $~3\%$ increase in bias stddev, while saving $~24\%$ of worst-case compute. By comparison, the less conservative value of $p_s = 4.43e5$ results in a $~12\%$ increase in bias stddev, while saving $~39\%$ of worst-case compute.
+We therefore recommend a nominal value of $p_s = 3.35 \cdot 10^{6} \pm 1.98 \cdot 10^{4}$ for a good balance between compute and bias. Compared to the largest reasonable value of $p_s = 1e7$, this value results in only a $~3\%$ increase in bias stddev, while saving $~24\%$ of worst-case compute. By comparison, the less conservative value of $p_s = 4.43e5$ results in a $~12\%$ increase in bias stddev, while saving $~39\%$ of worst-case compute.
 
 The recommendation corresponds to $\beta = 0.51$, meaning that compute savings are considered roughly half as important as bias reduction.
 

@@ -24,7 +24,7 @@
 \usepackage{amsmath, amssymb, amsfonts}
 \usepackage{booktabs}     % tables
 \usepackage{geometry}     % page layout
-\usepackage{hyperref}     % links
+\usepackage[hidelinks]{hyperref}     % links
 \geometry{margin=1in}
 
 % Code highlighting
@@ -43,11 +43,14 @@
   frame=single
 }
 
-\usepackage{fontspec}   % LuaTeX — good Unicode fonts
+\usepackage{fontspec}   % LuaTeX — good Unicode fontssetmainfont
+\setmainfont{Latin Modern Roman}
 \usepackage{microtype}  % better typography
 \usepackage{siunitx}    % number alignment and scientific notation
 \usepackage{caption}    % multi-paragraph captions & justification
 \captionsetup{justification=raggedright,singlelinecheck=false}
+
+\usepackage{amsmath}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}

@@ -246,18 +246,18 @@
     \begin{figure}[ht!]
         \centering
         \import{latex-src/visuals}{bias_no_correlation_chart}
-        \caption{Graph demonstrating the lack of correlation between $p\_\text{fail}$, $\text{ratio}\_\text{pass}$, and bias in the base case of $p_s = 1$}
+        \caption{Graph demonstrating the lack of correlation between $p\_\text{fail}$, $\operatorname{pass_ratio}$, and bias in the base case of $p_s = 1$}
         \label{fig:ps_experiment1}
     \end{figure}
 
     \paragraph{Objective.}
     To investigate the relationship between bias, $p_\text{fail}$, and pass ratio.
-    $p_\text{fail}$ is calculated using $p$, $q$ and $n$, and so betwen it and $ratio\_pass$ we can explore the bias behavior of BIOD across the parameter space in the base-case of $p_s = 1$.
+    $p_\text{fail}$ is calculated using $p$, $q$ and $n$, and so betwen it and $\operatorname{pass_ratio}$ we can explore the bias behavior of BIOD across the parameter space in the base-case of $p_s = 1$.
 
     \subsubsection{Setup.}
 
     \begin{itemize}
-        \item We select $ratio_pass \in \{0.2, 0.5, 0.8, 0.9, 0.95, 0.99, 0.999\}$.
+        \item We select $\operatorname{pass_ratio} \in \{0.2, 0.5, 0.8, 0.9, 0.95, 0.99, 0.999\}$.
         \item We vary $p_\text{fail}$ from $0.05$ to $0.50$ in increments of $0.01$
         \item For each $p_\text{fail}$, we compute the corresponding dataset size $n$ using:
         \[
@@ -273,7 +273,7 @@
         \item Draw a value $x$ from a uniform distribution $U(0, 1)$.
         \item Determine range for the rate of failure based on the following piecewise function:
         \[
-            failure_rate =
+            \operatorname{failure_rate} =
             \begin{cases}
                 [0.001, 0.01] & x < 0.1 \\
                 [0.01, 0.05] & 0.1 \le x < 0.3 \\
@@ -283,36 +283,36 @@
             \end{cases}
         \]
         \item Draw a true failure probability $p_\text{fail, true}$ from a uniform distribution over the determined range.
-        \item Run BIOD using the failure rate found, noting the $pass\_ratio$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
-        \item Compute bias as $p_\text{fail, true} - pass\_ratio$.
-        \item Compute the mean and standard deviation of bias across all iterations for each $ratio\_pass$ value.
+        \item Run BIOD using the failure rate found, noting the $\operatorname{pass_ratio}$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
+        \item Compute bias as $p_\text{fail, true} - \operatorname{pass_ratio}$.
+        \item Compute the mean and standard deviation of bias across all iterations for each $\operatorname{pass_ratio}$ value.
     \end{itemize}
             
     For each $p_\text{fail}$, compute:
     \begin{itemize}
-        \item The mean of all bias means across all $ratio\_pass$ values.
-        \item The standard deviation of all bias means across all $ratio\_pass$ values.
-        \item The mean of all bias standard deviations across all $ratio\_pass$ values.
-        \item The standard deviation of all bias standard deviations across all $ratio\_pass$ values.
+        \item The mean of all bias means across all $\operatorname{pass_ratio}$ values.
+        \item The standard deviation of all bias means across all $\operatorname{pass_ratio}$ values.
+        \item The mean of all bias standard deviations across all $\operatorname{pass_ratio}$ values.
+        \item The standard deviation of all bias standard deviations across all $\operatorname{pass_ratio}$ values.
     \end{itemize}
 
     \subsubsection{Definition of Metrics.}
 
         \begin{itemize}
             \item $p_\text{fail}$: Calculated failure probability from BIOD.
-            \item $ratio\_pass$: Pass ratio parameter provided to BIOD.
+            \item $\operatorname{pass_ratio}$: Pass ratio parameter provided to BIOD.
             \item $bias$: Difference between true failure probability and observed pass ratio. The mean of bias represents systematic error, while the standard deviation represents variability in the error.
         \end{itemize}
 
     \subsubsection{Hypothesis.}
 
-    We expect bias to increase proportionally with the difference between $p_\text{fail}$ and $ratio\_pass$.
+    We expect bias to increase proportionally with the difference between $p_\text{fail}$ and $\operatorname{pass_ratio}$.
 
     \subsubsection{Results.}
 
-    Contrary to our hypothesis, we find that bias remains relatively constant across the parameter space, with mean bias values clustering around $0.0$ and standard deviation of bias remaining low for all combinations of $p_\text{fail}$ and $ratio\_pass$.
+    Contrary to our hypothesis, we find that bias remains relatively constant across the parameter space, with mean bias values clustering around $0.0$ and standard deviation of bias remaining low for all combinations of $p_\text{fail}$ and $\operatorname{pass_ratio}$.
 
-    We also found that the standard deviation of bias mean and standard deviation of bias standard deviation across all $ratio\_pass$ values remained low for all $p_\text{fail}$ values.
+    We also found that the standard deviation of bias mean and standard deviation of bias standard deviation across all $\operatorname{pass_ratio}$ values remained low for all $p_\text{fail}$ values.
 
     \subsubsection{Analysis / Interpretation.}
 
@@ -347,7 +347,7 @@
             \item Draw a value $x$ from a uniform distribution $U(0, 1)$.
             \item Determine range for the rate of failure based on the following piecewise function:
             \[
-                failure_rate = \begin{cases}
+                \operatorname{failure_rate} = \begin{cases}
                 [0.001, 0.01] & x < 0.1 \\
                 [0.01, 0.05] & 0.1 \le x < 0.3 \\
                 [0.05, 0.20] & 0.3 \le x < 0.65 \\
@@ -356,8 +356,8 @@
                 \end{cases}
             \]
             \item Draw a true failure probability $p_\text{fail, true}$ from a uniform distribution over the determined range.
-            \item Run BIOD using the failure rate found, noting the $pass\_ratio$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
-            \item Compute bias as $p_\text{fail, true} - pass\_ratio$.
+            \item Run BIOD using the failure rate found, noting the $\operatorname{pass_ratio}$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
+            \item Compute bias as $p_\text{fail, true} - \operatorname{pass_ratio}$.
             \item Compute the fraction of initial $k$ actually performed: $\frac{k_\text{performed}}{k_\text{initial}}$.
         \end{itemize}
         \item Compute the mean and standard deviation of bias across all iterations.
@@ -435,13 +435,13 @@
         \item Calculate the $r^2$ value for each fit to assess goodness of fit.
         \item Introduce a balance factor $\beta$ and a Lagrangian objective function \cite{Everett1963} to weigh the importance of bias reduction vs computational cost:
         \[
-            \text{objective}(p_s, \beta) = hill_{\text{bias}} - \beta \cdot hill_{\text{compute}}
+            \operatorname{objective_score}(p_s) = \operatorname{bias_std}(p_s) - \beta \cdot \operatorname{compute_frac}(p_s)
         \]
         \item For a range of $200$ $\beta$ values in the logarithmic space from $10^{-5}$ to $10^{1}$, find the prior strength $p_s$ that minimizes the objective function.
         \item Only consider solutions where $p_s$ is in the observed range of $10^{0}$ to $10^{12}$.
         \item For each optimal $p_s$ found, find the error on $p_s$ using the delta method:
         \[
-            \text{error}(p_s) = \frac{\sigma hill_{\text{bias}}^2 + (\beta \cdot \sigma hill_{\text{compute}}^2) }{\frac{\partial \text{objective}(p_s, \beta) }{\partial p_s}}
+            \operatorname{error}(p_s) = \frac{\sigma hill_{\operatorname{bias}}^2 + (\beta \cdot \sigma hill_{\operatorname{compute}}^2) }{\frac{\partial \operatorname{objective}(p_s, \beta) }{\partial p_s}}
         \]
         \item Build a table of optimal $p_s$ values for each $\beta$ with the following columns:
         \begin{itemize}
@@ -486,7 +486,7 @@
 
     It also revealed small errors (most $<0.5\%$) on the values of both fits, and by extension, on the recommended prior strength values.
 
-    The table shown in Figure~\ref{fig:ps_hill_fit} shows a value of $p_s = 3.35 \times 10^{6} \pm 1.98 \times 10^{4}$ 
+    The table shown in Figure~\ref{fig:ps_hill_fit} shows a value of $p_s = 3.35 \cdot 10^{6} \pm 1.98 \cdot 10^{4}$ 
     provides a good balance between bias reduction and computational cost, yielding a normalized standard deviation of bias of $0.052$ and a normalized fraction of worst-case compute performed of $0.76$.
 
     \subsubsection{Analysis / Interpretation.}
@@ -501,6 +501,6 @@
 
     \subsubsection{Summary / Recommendation.}
     
-    We recommend a prior strength value of $p_s = 3.35 \times 10^{6} \pm 1.98 \times 10^{4}$ for BIOD, balancing bias reduction and computational cost effectively for most applications.
+    We recommend a prior strength value of $p_s = 3.35 \cdot 10^{6} \pm 1.98 \cdot 10^{4}$ for BIOD, balancing bias reduction and computational cost effectively for most applications.
 
     The small errors on both the curve fits and recommended prior strength values provide confidence in the reliability of this recommendation.
