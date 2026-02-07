@@ -1,0 +1,15 @@
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Failure Rate},
+    ylabel={Count},
+    ymode=log,
+    width=12cm,
+    height=8cm,
+    grid=major
+]
+\addplot[
+    only marks,
+    mark=*,
+    mark size=1pt] table [x=p_fail, y=count, col sep=comma] {results/p_fail_histogram.csv};
+\end{axis}
+\end{tikzpicture}

@@ -25,6 +25,9 @@ fn main() {
                 experiments::prior_strength_experiments();
                 return;
             }
+            "--ps-fail-histogram" => {
+                experiments::simulate_true_fail_probabilities();
+            }
             "--p-fail-experiments" => {
                 experiments::p_fail_experiments();
                 return;
@@ -49,6 +52,7 @@ fn main() {
         println!("[ 5 ] Prior Strength Bias Experiments");
         println!("[ 6 ] p_fail Experiments");
         println!("[ 7 ] Damping Constant Experiments");
+        println!("[ 8 ] Simulate true fail probabilities for p_s experiments");
 
         print!("= ");
         std::io::Write::flush(&mut std::io::stdout()).expect("Failed to flush stdout");
@@ -65,6 +69,7 @@ fn main() {
             "5" => experiments::prior_strength_experiments(),
             "6" => experiments::p_fail_experiments(),
             "7" => experiments::damping_experiments(),
+            "8" => experiments::simulate_true_fail_probabilities(),
             _ => println!("Invalid option"),
         }
     }

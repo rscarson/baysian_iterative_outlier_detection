@@ -270,3 +270,32 @@ fn next_fail_probability(rng: &mut impl Rng) -> f64 {
     // uniformly sample between min and max
     rng.random_range(min..=max)
 }
+
+pub fn simulate_true_fail_probabilities() {
+    const ITERS: usize = 100_000;
+    const FILENAME: &str = "p_fail_histogram.csv";
+    const HEADINGS: [&str; 2] = ["p_fail", "count"];
+
+    let mut rng = rng();
+    let mut probabilities = Vec::new();
+
+    for _ in 0..ITERS {
+        probabilities.push(next_fail_probability(&mut rng));
+    }
+
+    let mut histogram: Vec<[f64; 2]> = Vec::new();
+    for p in &probabilities {
+        // First find out if any entry is already <epsilon from the current value
+        let entry = histogram
+            .iter_mut()
+            .find(|row| f64::abs(*p - row[0]) < 0.001);
+        if let Some(row) = entry {
+            row[1] += 1.0;
+        } else {
+            histogram.push([*p, 1.0]);
+        }
+    }
+
+    println!("Done; Exporting results to {FILENAME}");
+    export_results(FILENAME, HEADINGS, &histogram);
+}

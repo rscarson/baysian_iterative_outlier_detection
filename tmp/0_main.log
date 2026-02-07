@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.22.0 (MiKTeX 25.4 Portable) (format=lualatex 2025.10.23)  6 FEB 2026 13:18
+This is LuaHBTeX, Version 1.22.0 (MiKTeX 25.4 Portable) (format=lualatex 2025.10.23)  7 FEB 2026 13:39
  restricted system commands enabled.
  file:line:error style messages enabled.
 **latex-src/0_main.tex
@@ -846,6 +846,11 @@ Package pgfplots info on input line 32: Using 'lua backend=false' for plot 0 (t
 ype 'pgfplothandlerlineto'): LUA does not support error bars (yet).
 Package pgfplots info on input line 46: Using 'lua backend=false' for plot 1 (t
 ype 'pgfplothandlerlineto'): LUA does not support error bars (yet).
+Package pgfplots info on input line 9: Using 'lua backend=false' for axis: ymod
+e=log unsupported (yet).
+PGFPlots: reading {results/p_fail_histogram.csv}
+
+
 
 
 

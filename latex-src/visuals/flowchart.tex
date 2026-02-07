@@ -1,9 +1,17 @@
+\definecolor{processblue}{RGB}{79,129,189}
+\definecolor{decisiongreen}{RGB}{155,187,89}
+\definecolor{stopred}{RGB}{192,80,77}
 \begin{tikzpicture}[node distance=2cm, 
-    startstop/.style={rectangle, rounded corners, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=red!30},
-    process/.style={rectangle, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=blue!20},
-    decision/.style={diamond, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=green!20, aspect=2},
+    startstop/.style={rectangle, rounded corners, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=stopred!30},
+    process/.style={rectangle, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=processblue!20},
+    decision/.style={diamond, minimum width=2.5cm, minimum height=0.8cm, text centered, draw=black, fill=decisiongreen!20, aspect=2},
     arrow/.style={thick,->,>=stealth}
 ]
+    \tikzset{
+        node distance=2.2cm,
+        every node/.style={font=\small},
+    }
+
 
     % Nodes
     \node (start) [startstop] {Determine initial $k$};

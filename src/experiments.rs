@@ -15,6 +15,9 @@ pub fn prior_strength_experiments() {
     println!("{}", String::from_utf8_lossy(&output.stdout));
     println!("{}", String::from_utf8_lossy(&output.stderr));
 }
+pub fn simulate_true_fail_probabilities() {
+    prior_strength::simulate_true_fail_probabilities();
+}
 
 mod p_fail;
 pub fn p_fail_experiments() {

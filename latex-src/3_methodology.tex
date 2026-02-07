@@ -246,18 +246,25 @@
     \begin{figure}[ht!]
         \centering
         \import{latex-src/visuals}{bias_no_correlation_chart}
-        \caption{Graph demonstrating the lack of correlation between $p\_\text{fail}$, $\operatorname{pass_ratio}$, and bias in the base case of $p_s = 1$}
+        \caption{Graph demonstrating the lack of correlation between $p\_\text{fail}$, $\operatorname{pass\_ratio}$, and bias in the base case of $p_s = 1$}
         \label{fig:ps_experiment1}
+    \end{figure}
+
+    \begin{figure}[ht!]
+        \centering
+        \import{latex-src/visuals}{p_s_histogram}
+        \caption{Scatter plot showing the distribution of true $p_\text{fail} $ values across all iterations of the experiment, demonstrating the coverage of the parameter space.}
+        \label{fig:ps_histogram}
     \end{figure}
 
     \paragraph{Objective.}
     To investigate the relationship between bias, $p_\text{fail}$, and pass ratio.
-    $p_\text{fail}$ is calculated using $p$, $q$ and $n$, and so betwen it and $\operatorname{pass_ratio}$ we can explore the bias behavior of BIOD across the parameter space in the base-case of $p_s = 1$.
+    $p_\text{fail}$ is calculated using $p$, $q$ and $n$, and so between it and $\operatorname{pass\_ratio}$ we can explore the bias behavior of BIOD across the parameter space in the base-case of $p_s = 1$.
 
     \subsubsection{Setup.}
 
     \begin{itemize}
-        \item We select $\operatorname{pass_ratio} \in \{0.2, 0.5, 0.8, 0.9, 0.95, 0.99, 0.999\}$.
+        \item We select $\operatorname{pass\_ratio} \in \{0.2, 0.5, 0.8, 0.9, 0.95, 0.99, 0.999\}$.
         \item We vary $p_\text{fail}$ from $0.05$ to $0.50$ in increments of $0.01$
         \item For each $p_\text{fail}$, we compute the corresponding dataset size $n$ using:
         \[
@@ -273,7 +280,7 @@
         \item Draw a value $x$ from a uniform distribution $U(0, 1)$.
         \item Determine range for the rate of failure based on the following piecewise function:
         \[
-            \operatorname{failure_rate} =
+            \operatorname{failure\_rate} =
             \begin{cases}
                 [0.001, 0.01] & x < 0.1 \\
                 [0.01, 0.05] & 0.1 \le x < 0.3 \\
@@ -283,40 +290,49 @@
             \end{cases}
         \]
         \item Draw a true failure probability $p_\text{fail, true}$ from a uniform distribution over the determined range.
-        \item Run BIOD using the failure rate found, noting the $\operatorname{pass_ratio}$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
-        \item Compute bias as $p_\text{fail, true} - \operatorname{pass_ratio}$.
-        \item Compute the mean and standard deviation of bias across all iterations for each $\operatorname{pass_ratio}$ value.
+        \item Run BIOD using the failure rate found, noting the $\operatorname{pass\_ratio}$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
+        \item Compute bias as $p_\text{fail, true} - \operatorname{pass\_ratio}$.
+        \item Compute the mean and standard deviation of bias across all iterations for each $\operatorname{pass\_ratio}$ value.
     \end{itemize}
             
     For each $p_\text{fail}$, compute:
     \begin{itemize}
-        \item The mean of all bias means across all $\operatorname{pass_ratio}$ values.
-        \item The standard deviation of all bias means across all $\operatorname{pass_ratio}$ values.
-        \item The mean of all bias standard deviations across all $\operatorname{pass_ratio}$ values.
-        \item The standard deviation of all bias standard deviations across all $\operatorname{pass_ratio}$ values.
+        \item The mean of all bias means across all $\operatorname{pass\_ratio}$ values.
+        \item The standard deviation of all bias means across all $\operatorname{pass\_ratio}$ values.
+        \item The mean of all bias standard deviations across all $\operatorname{pass\_ratio}$ values.
+        \item The standard deviation of all bias standard deviations across all $\operatorname{pass\_ratio}$ values.
     \end{itemize}
 
     \subsubsection{Definition of Metrics.}
 
         \begin{itemize}
+            \item $p_\text{fail, true}$: True failure probability drawn from the defined piecewise distribution, magnifying the presence of segments of the parameter space that are more likely to be encountered in practice, while still covering the full range of $p_\text{fail}$ values.
             \item $p_\text{fail}$: Calculated failure probability from BIOD.
-            \item $\operatorname{pass_ratio}$: Pass ratio parameter provided to BIOD.
+            \item $\operatorname{pass\_ratio}$: Pass ratio parameter provided to BIOD.
             \item $bias$: Difference between true failure probability and observed pass ratio. The mean of bias represents systematic error, while the standard deviation represents variability in the error.
         \end{itemize}
 
     \subsubsection{Hypothesis.}
 
-    We expect bias to increase proportionally with the difference between $p_\text{fail}$ and $\operatorname{pass_ratio}$.
+    We expect bias to increase proportionally with the difference between $p_\text{fail}$ and $\operatorname{pass\_ratio}$.
+
+    If $p_\text{fail}$ has a statistically significant effect on bias, we would expect to see trends in bias as $p_\text{fail}$ increases, either in the mean, or in the standard deviation, or both. 
+
+    If $\operatorname{pass\_ratio}$ has a statistically significant effect on bias, we would expect to see large error bars on the mean or standard deviation of bias within each set of trials for each $\operatorname{pass\_ratio}$ value.
 
     \subsubsection{Results.}
 
-    Contrary to our hypothesis, we find that bias remains relatively constant across the parameter space, with mean bias values clustering around $0.0$ and standard deviation of bias remaining low for all combinations of $p_\text{fail}$ and $\operatorname{pass_ratio}$.
+    Contrary to our hypothesis, we find that bias remains relatively constant across the parameter space, with mean bias values clustering around $0.0$ and standard deviation of bias remaining low for all combinations of $p_\text{fail}$ and $\operatorname{pass\_ratio}$.
 
-    We also found that the standard deviation of bias mean and standard deviation of bias standard deviation across all $\operatorname{pass_ratio}$ values remained low for all $p_\text{fail}$ values.
+    We also found that the standard deviation of bias mean and standard deviation of bias standard deviation across all $\operatorname{pass\_ratio}$ values remained low for all $p_\text{fail}$ values.
 
     \subsubsection{Analysis / Interpretation.}
 
     Since the parameters tested involve all of BIOD's inputs except for prior strength, this experiment establishes that BIOD's bias behavior is not predictable from inputs, and will be a factor of prior strength alone.
+
+    The lack of correlation between bias and $p_\text{fail}$ implies a lack of a statistically significant effect of $p_\text{fail}$ on bias, and the mean near $0.0$ across all $\operatorname{pass\_ratio}$ values implies no systemic bias in either direction across the parameter space.
+    
+    The small standard deviation of bias mean and bias standard deviation across all $\operatorname{pass\_ratio}$ values implies no significant effect of $\operatorname{pass\_ratio}$ on bias, nor any statistically significant interaction effects between $\operatorname{pass\_ratio}$ and $p_\text{fail}$ on bias.
 
     \subsubsection{Summary / Recommendation.}
 
@@ -347,7 +363,7 @@
             \item Draw a value $x$ from a uniform distribution $U(0, 1)$.
             \item Determine range for the rate of failure based on the following piecewise function:
             \[
-                \operatorname{failure_rate} = \begin{cases}
+                \operatorname{failure\_rate} = \begin{cases}
                 [0.001, 0.01] & x < 0.1 \\
                 [0.01, 0.05] & 0.1 \le x < 0.3 \\
                 [0.05, 0.20] & 0.3 \le x < 0.65 \\
@@ -356,8 +372,8 @@
                 \end{cases}
             \]
             \item Draw a true failure probability $p_\text{fail, true}$ from a uniform distribution over the determined range.
-            \item Run BIOD using the failure rate found, noting the $\operatorname{pass_ratio}$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
-            \item Compute bias as $p_\text{fail, true} - \operatorname{pass_ratio}$.
+            \item Run BIOD using the failure rate found, noting the $\operatorname{pass\_ratio}$ value at the end of the run, the initial estimate for $k$ and the number of iterations actually performed.
+            \item Compute bias as $p_\text{fail, true} - \operatorname{pass\_ratio}$.
             \item Compute the fraction of initial $k$ actually performed: $\frac{k_\text{performed}}{k_\text{initial}}$.
         \end{itemize}
         \item Compute the mean and standard deviation of bias across all iterations.
@@ -367,6 +383,7 @@
     \subsubsection{Definition of Metrics.}
 
     \begin{itemize}
+        \item $p_\text{fail, true}$: True failure probability drawn from the defined piecewise distribution, magnifying the presence of segments of the parameter space that are more likely to be encountered in practice, while still covering the full range of $p_\text{fail}$ values.
         \item $p_s$: Prior strength parameter provided to BIOD.
         \item $bias$: Difference between true failure probability and observed pass ratio. The mean of bias represents systematic error, while the standard deviation represents variability in the error.
         \item $compute\_fraction$: Fraction of initial $k$ actually performed, representing computational cost.
